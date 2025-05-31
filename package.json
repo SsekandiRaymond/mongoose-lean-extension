@@ -1,0 +1,36 @@
+{
+    "name": "mongoose-lean-extension",
+    "version": "0.1.0",
+    "description": "This plugin extends the functionality of mongoose .lean() to avoid the extra work brought by the default behavior...",
+    "keywords": [
+        "mongoose",
+        "lean",
+        "mongo",
+        "plugin",
+        "mongodb",
+        "ObjectId",
+        "extension",
+        "stringify"
+    ],
+    "license": "MIT",
+    "author": "ssekandi <ssekandiraymond01@gmail.com>",
+    "main": "index.js",
+    "scripts": {
+        "test": "jest --coverage",
+        "dev": "npx nodemon .",
+        "start": "node ."
+    },
+    "peerDependencies": {
+        "mongoose": "8.x"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0",
+        "mongodb-memory-server": "^10.1.4",
+        "mongoose": "^8.15.1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/SsekandiRaymond/mongoose-lean-extension.git"
+    },
+    "homepage": "https://github.com/SsekandiRaymond/mongoose-lean-extension.git"
+}
