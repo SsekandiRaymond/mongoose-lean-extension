@@ -12,8 +12,8 @@ const applyStringifyAtPath = require("./util/stringifyPaths");
  *
  *
  * @example
- * import mongooseLeanExtension from "mongoose-lean-extension";
- * import mongoose from "mongoose";
+ * const mongooseLeanExtension = require("mongoose-lean-extension");
+ * const mongoose = require("mongoose");
  * mongoose.plugin(mongooseLeanExtension); // Apply plugin to all mongoose schemas
  *
  * const ContributorSchema = new Schema({

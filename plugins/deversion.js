@@ -4,8 +4,8 @@
  * @param schema mongoose  schema
  *
  * @example
- * import deversion from "mongoose-lean-extension/plugins/deversion";
- * import mongoose from "mongoose";
+ * const deversion = require("mongoose-lean-extension/plugins/deversion");
+ * const mongoose = require("mongoose");
  * mongoose.plugin(deversion);
  *
  * ...

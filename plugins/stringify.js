@@ -3,8 +3,8 @@
  * @param schema mongoose  schema
  *
  * @example
- * import stringify_id from "mongoose-lean-extension/plugins/stringify";
- * import mongoose from "mongoose";
+ * const stringify_id = require("mongoose-lean-extension/plugins/stringify");
+ * const mongoose = require("mongoose");
  *
  * const schema = new mongoose.Schema({ ... }).plugin(stringify_id) // If you want to have ObjectId typed _id, then exclude the plugin
  * const model = mongoose.model("model", schema)

@@ -5,8 +5,8 @@ const applyStringifyAtPath = require("../util/stringifyPaths");
  * @param schema mongoose  schema
  *
  * @example
- * import stringify_fields from "mongoose-lean-extension/plugins/otherStrings";
- * import mongoose from "mongoose";
+ * const stringify_fields = require("mongoose-lean-extension/plugins/otherStrings");
+ * const mongoose = require("mongoose");
  * mongoose.plugin(stringify_fields) // Applies plugin to all schemas
  *
  * ...

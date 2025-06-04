@@ -1,4 +1,4 @@
-# mongoose-lean-extension
+# [MONGOOSE LEAN EXTENSION](https://github.com/SsekandiRaymond/mongoose-lean-extension)
 
 A powerful Mongoose plugin that **extends the functionality of `.lean()`** queries to eliminate common post-processing steps — like stringifying ObjectIds and removing internal Mongoose metadata like `__v`.
 
