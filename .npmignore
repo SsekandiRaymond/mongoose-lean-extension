@@ -1,0 +1,5 @@
+jest.config.js
+node_modules
+.gitignore
+__tests__
+coverage

@@ -31,8 +31,8 @@ npm i mongoose-lean-extension
 ### Global Plugin (Recommended)
 
 ```javascript
-import mongooseLeanExtension from "mongoose-lean-extension";
-import mongoose from "mongoose";
+const mongooseLeanExtension = require("mongoose-lean-extension");
+const mongoose = require("mongoose");
 
 // Apply plugin globally to all schemas
 mongoose.plugin(mongooseLeanExtension);
@@ -41,7 +41,7 @@ mongoose.plugin(mongooseLeanExtension);
 ### Per-Schema Usage
 
 ```javascript
-import mongooseLeanExtension from "mongoose-lean-extension";
+const mongooseLeanExtension = require("mongoose-lean-extension");
 
 const schema = new mongoose.Schema({
     /* ... */
@@ -76,8 +76,8 @@ Model.find().lean({
 ## 🧪 Example
 
 ```javascript
-import mongooseLeanExtension from "mongoose-lean-extension";
-import mongoose from "mongoose";
+const mongooseLeanExtension = require("mongoose-lean-extension");
+const mongoose = require("mongoose");
 
 mongoose.plugin(mongooseLeanExtension);
 
@@ -192,16 +192,16 @@ This package consists of a modular design that allows importing specific plugins
 `Example: Using Only deversion`
 
 ```js
-import deversion from "mongoose-lean-extension/plugins/deversion";
+const deversion = require("mongoose-lean-extension/plugins/deversion");
 mongoose.plugin(deversion);
 ```
 
 `Example: Selective Composition`
 
 ```js
-import stringify from "mongoose-lean-extension/plugins/stringify";
-import stringify_fields from "mongoose-lean-extension/plugins/otherStrings";
-import deversion from "mongoose-lean-extension/plugins/deversion";
+const stringify = require("mongoose-lean-extension/plugins/stringify");
+const stringify_fields = require("mongoose-lean-extension/plugins/otherStrings");
+const deversion = require("mongoose-lean-extension/plugins/deversion");
 
 const schema = new mongoose.Schema({...});
 schema.plugin(stringify);
