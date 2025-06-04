@@ -1,6 +1,6 @@
 {
     "name": "mongoose-lean-extension",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "This plugin extends the functionality of mongoose .lean() to avoid the extra work brought by the default behavior...",
     "keywords": [
         "mongoose",

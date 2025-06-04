@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const applyStringifyAtPath = require("./util/stringifyPaths");
 
 /**
@@ -128,7 +129,10 @@ module.exports = function mongooseLeanExtension(schema) {
             if (_id) {
                 // Looping through results array to (hex) stringify the _id field from ObjectId
                 result.forEach((record) => {
-                    record._id = record?._id?.toString();
+                    record._id =
+                        record?._id && record._id instanceof mongoose.Types.ObjectId
+                            ? record._id.toString()
+                            : record?._id;
                 });
             }
 

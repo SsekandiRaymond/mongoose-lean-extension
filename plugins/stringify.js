@@ -15,6 +15,8 @@
  * @link ssekandiraymond01@gmail.com
  */
 
+const mongoose = require("mongoose");
+
 module.exports = function stringify_id(schema) {
     /** Mongo .find() or .findOne() query */
     schema.post(["find", "findOne"], function (result, next) {
@@ -31,7 +33,10 @@ module.exports = function stringify_id(schema) {
 
         // Looping through results array to (hex) stringify the _id field from ObjectId
         result.forEach((record) => {
-            record._id = record?._id?.toString();
+            record._id =
+                record?._id && record._id instanceof mongoose.Types.ObjectId
+                    ? record._id.toString()
+                    : record?._id;
         });
 
         // Obvious, isn't it?
