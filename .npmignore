@@ -1,5 +1,6 @@
 jest.config.js
-node_modules
+node_modules/
 .gitignore
-__tests__
-coverage
+__tests__/
+coverage/
+PLUGINS/

@@ -1,14 +1,25 @@
 # [MONGOOSE LEAN EXTENSION](https://github.com/SsekandiRaymond/mongoose-lean-extension)
 
-A powerful Mongoose plugin that **extends the functionality of `.lean()`** queries to eliminate common post-processing steps — like stringifying ObjectIds and removing internal Mongoose metadata like `__v`.
+A powerful Mongoose plugin that **extends the functionality of `.lean()`** queries to eliminate common post-processing steps — like stringifying ObjectIds, renaming `_id` key to something else, and removing internal Mongoose metadata like `__v`.
 
 ---
 
-## 🚀 Overview
+> `mongoose-lean-extension@1.0.0` is here. Welcome this major version update. 0 -> 1
+
+### Breaking Changes:
+
+> Read through this README for complete overview
+> Visit my GitHub repo for the source code
+> Typescript support
+> My contact are everywhere in this source code
+
+---
+
+## Overview
 
 Mongoose’s `.lean()` is a great performance optimization, returning plain JavaScript objects instead of full Mongoose documents. But it comes with annoyances:
 
--   ObjectId fields are still BSON types (`ObjectId`) that require manual conversion.
+-   ObjectId keys are still BSON types (`ObjectId`) that require manual conversion.
 -   The `__v` version key is often unnecessarily present in results.
 -   Deeply nested ObjectIds in subdocuments aren't stringified without additional effort.
 
@@ -20,7 +31,7 @@ Mongoose’s `.lean()` is a great performance optimization, returning plain Java
 
 ---
 
-## 📦 Installation
+## Installation
 
 ```bash
 npm i mongoose-lean-extension
@@ -53,27 +64,34 @@ schema.plugin(mongooseLeanExtension);
 
 -   All plugins are attached to the schema before it is compiled to create a model
 
-## ⚙️ Configuration Options
+    > ⚡ `mongoose-lean-extension` introduces negligible latency (<2ms per 100 documents) on average `.lean()` queries.
+
+-   For how utility function in stringifyKeys
+    > See [`util/stringifyPaths.js`](./util/stringifyPaths.js)
+
+## Configuration Options
 
 The plugin is configured via the .lean() query method.
 
 ```javascript
 Model.find().lean({
-    _id: true, // (default: true) — Convert `_id` to string
-    __v: false, // (default: false) — Remove `__v` from results
-    fields: ["nested._id"], // (optional) — Array of mongo-like paths [dot-paths] to nested ObjectId fields to stringify
+    stringifyId: true, // (default: true) — Convert `_id` to string
+    showVersion: false, // (default: false) — Remove `__v` from results
+    stringifyKeys: ["nested._id"], // (optional) — Array of mongo-like paths [dot-paths] to nested ObjectId fields to stringify
+    rename: "key", // Renames `_id` to `key`
 });
 ```
 
 ## Option Details
 
-| Option | Type     | Default | Description                                                                             |
-| ------ | -------- | ------- | --------------------------------------------------------------------------------------- |
-| \_id   | boolean  | true    | If true, stringifies the document `_id`. If false, leaves as ObjectId.                  |
-| \_\_v  | boolean  | false   | If false, removes the `__v` field from results if they exist otherwise, leaves them.    |
-| fields | string[] | []      | Mongo-like (Dot-separated) paths to any nested ObjectId fields to convert into strings. |
+| Option          | Type     | Default   | Description                                                                             |
+| --------------- | -------- | --------- | --------------------------------------------------------------------------------------- |
+| `stringifyId`   | boolean  | true      | If true, stringifies the document `_id`. If false, leaves as ObjectId.                  |
+| `showVersion`   | boolean  | false     | If false, removes the `__v` field from results if they exist otherwise, leaves them.    |
+| `stringifyKeys` | string[] | []        | Mongo-like (Dot-separated) paths to any nested ObjectId fields to convert into strings. |
+| `rename`        | string   | undefined | Renames `_id` to provided string value.                                                 |
 
-## 🧪 Example
+## Example
 
 ```javascript
 const mongooseLeanExtension = require("mongoose-lean-extension");
@@ -128,7 +146,7 @@ const Package = mongoose.model("Package", PackageSchema);
  */
 
 const packages = await Package.find().lean({
-    fields: ["contributors._id"],
+    stringifyKeys: ["contributors._id"],
 });
 
 console.dir(packages, { depth: null });
@@ -162,9 +180,9 @@ console.dir(packages, { depth: null });
 
 -   If the query uses .lean(), it inspects custom plugin options from lean({...}).
 
--   \_id fields are converted to .toString() if enabled.
+-   `_id` fields are converted to .toString() if enabled.
 
--   \_\_v is stripped if disabled.
+-   `__v` is stripped if disabled.
 
 Nested ObjectIds are stringified recursively using a safe traversal method.
 
@@ -173,91 +191,88 @@ Nested ObjectIds are stringified recursively using a safe traversal method.
 The helper function `applyStringifyAtPath(object, path)` walks through nested objects and arrays to convert specific paths like:
 
 ```js
-fields: ["contributors._id", "authors.contact._id"];
+stringifyKeys: ["contributors._id", "authors.contact._id"];
 ```
 
-## 🧩 Plugin Architecture
+## Plugin Architecture
 
 This package consists of a modular design that allows importing specific plugins if needed.
 
 #### Included Plugins
 
-| Plugin           | File                    | Purpose                           |
-| ---------------- | ----------------------- | --------------------------------- |
-| stringify        | plugins/stringify.js    | Converts top-level \_id fields    |
-| deversion        | plugins/deversion.js    | Removes \_\_v fields              |
-| stringify_fields | plugins/otherStrings.js | Stringifies custom ObjectId paths |
-| main             | index.js                | All-in-one plugin (recommended)   |
+| Plugin        | File       | Purpose                                          |
+| ------------- | ---------- | ------------------------------------------------ |
+| stringifyId   | plugins.js | Converts top-level `_id` fields                  |
+| rename        | plugins.js | Renames top-level `_id` to provided string value |
+| deversion     | plugins.js | Removes `__v` fields                             |
+| stringifyKeys | plugins.js | Stringifies custom ObjectId paths                |
+| main          | index.js   | All-in-one plugin (recommended)                  |
 
 `Example: Using Only deversion`
 
 ```js
-const deversion = require("mongoose-lean-extension/plugins/deversion");
+const { deversion } = require("mongoose-lean-extension/plugins");
 mongoose.plugin(deversion);
 ```
 
 `Example: Selective Composition`
 
 ```js
-const stringify = require("mongoose-lean-extension/plugins/stringify");
-const stringify_fields = require("mongoose-lean-extension/plugins/otherStrings");
-const deversion = require("mongoose-lean-extension/plugins/deversion");
+const { stringifyId } = require("mongoose-lean-extension/plugins.js");
+const { stringifyKeys } = require("mongoose-lean-extension/plugins.js");
+const { deversion } = require("mongoose-lean-extension/plugins.js");
+const { rename } = require("mongoose-lean-extension/plugins.js");
 
 const schema = new mongoose.Schema({...});
-schema.plugin(stringify);
-schema.plugin(stringify_fields);
+schema.plugin(stringifyKeys);
+schema.plugin(stringifyId);
 schema.plugin(deversion);
+schema.plugin(rename);
 ```
 
-### 🧪 Testing
+### Testing
 
 Unit tests are written using Jest.
 
 ```bash
-$ npm test
+$ npm run test
 
-> mongoose-lean-extension@0.1.0 test
+> mongoose-lean-extension@0.1.3 test
 > jest --coverage
 
- PASS  __tests__/deversion.test.js
- PASS  __tests__/otherStrings.test.js
  PASS  __tests__/index.test.js
- PASS  __tests__/stringify.test.js
----------------------------------|---------|----------|---------|---------|-------------------
-File                             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
----------------------------------|---------|----------|---------|---------|-------------------
-All files                        |   93.33 |    86.36 |     100 |   96.87 |
- Mongoose Lean Extension         |   91.66 |    86.95 |     100 |   95.23 |
-  index.js                       |   91.66 |    86.95 |     100 |   95.23 | 139
- Mongoose Lean Extension/plugins |   94.59 |    84.37 |     100 |   96.66 |
-  deversion.js                   |    90.9 |       80 |     100 |     100 | 23,31
-  otherStrings.js                |   93.75 |    85.71 |     100 |   92.85 | 50
-  stringify.js                   |     100 |     87.5 |     100 |     100 | 22
- Mongoose Lean Extension/util    |   92.85 |     90.9 |     100 |     100 |
-  stringifyPaths.js              |   92.85 |     90.9 |     100 |     100 | 9
----------------------------------|---------|----------|---------|---------|-------------------
+ PASS  __tests__/plugins.test.js (5.995 s)
+------------------------------|---------|----------|---------|---------|-------------------
+File                          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+------------------------------|---------|----------|---------|---------|-------------------
+All files                     |   95.91 |    86.66 |     100 |   97.64 |
+ Mongoose Lean Extension      |   95.23 |    84.81 |     100 |   97.22 |
+  index.js                    |   93.33 |    87.09 |     100 |   96.29 | 61
+  plugins.js                  |   96.29 |    83.33 |     100 |   97.77 | 59
+ Mongoose Lean Extension/util |     100 |      100 |     100 |     100 |
+  stringifyPaths.js           |     100 |      100 |     100 |     100 |
+------------------------------|---------|----------|---------|---------|-------------------
 
-Test Suites: 4 passed, 4 total
-Tests:       22 passed, 22 total
+Test Suites: 2 passed, 2 total
+Tests:       29 passed, 29 total
 Snapshots:   0 total
-Time:        5.313 s
-
+Time:        6.591 s
 Ran all test suites.
 ```
 
 Includes tests using `mongodb-memory-server` for in-memory database mocking.
 
-### 🧠 Advanced
+### Advanced
 
-#### How to Preserve \_id as ObjectId?
+#### How to Preserve `_id` as ObjectId?
 
 ```js
-Model.find().lean({ \_id: false }); // Disables stringification of \_id
+Model.find().lean({ _id: false }); // Disables stringification of `_id`
 ```
 
 Or; do not use the all-in-one plugin at "global level" rather use the purpose-specific at "schema level"
 
-#### How to Keep \_\_v?
+#### How to Keep `__v`?
 
 ```js
 Model.find().lean({ __v: true }); // Keeps __v field in results
@@ -330,7 +345,7 @@ async function __run_() {
     const users = await User.find().lean();
     console.log(users);
 
-    const cars = await Car.find().populate("owner").lean(); // if "stringify" plugin is used on mongoose "global level" that is, mongoose.plugin(stringify) and .populate("field") is on the query, both car._id and car.owner._id will be hex strings however, if it is used on schema level, for example, CarSchema.plugin(stringify) only: car._id will be hex string but car.owner._id will be ObjectId... if UserSchema.plugin(stringify): car.owner._id will be hex string but car._id will be ObjectId.
+    const cars = await Car.find().populate("owner").lean(); // if "stringifyId" plugin is used on mongoose "global level" that is, mongoose.plugin(stringifyId) and .populate("field") is on the query, both car._id and car.owner._id will be hex strings however, if it is used on schema level, for example, CarSchema.plugin(stringifyId) only: car._id will be hex string but car.owner._id will be ObjectId... if UserSchema.plugin(stringifyId): car.owner._id will be hex string but car._id will be ObjectId.
     console.log(cars);
 
     /** cars.owner might be null in case you do not assign the right object ids as new ones are created everytime a document is recorded. Check "owner" property assigned value for await Promise.allSettled([ ... ]) for Car.create({}) */
@@ -346,11 +361,11 @@ __run_().catch(console.error);
 -   ✅ Mongoose 8.x
 -   ✅ MongoDB >= 4.x
 
-### 🌟 Contributing
+### Contributing
 
 Pull requests are welcome! Feel free to open issues or suggestions on improvements, use cases, or performance enhancements.
 
-### 💬 Feedback
+### Feedback
 
 If this plugin saves you time or solves your pain, please consider starring the repo and sharing it with the Mongoose community!
 
@@ -360,6 +375,11 @@ If this plugin saves you time or solves your pain, please consider starring the 
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🫠 Contributors
+## Contributors
 
 1. [Ssekandi](https://github.com/SsekandiRaymond) - Author
+
+### 😏 Gotcha Section {Ignore if you are in a bad mood}
+
+-   Aaah nothing much, just weekly downloads reduce when I do not update this package.
+-   Anyways, I added the rename functionality because I found it a little awkward to use `_id` in my data for React Native's `FlatList` keyExtractor prop.
